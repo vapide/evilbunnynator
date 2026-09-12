@@ -62,6 +62,7 @@ public:
     bool is_repetition() const;
     bool is_insufficient_material() const;
 
+    // TODO: define in movegen.cpp
     // will be defined in movegen.cpp
     // last two non const because legal movegen make/unmakes en passant candidates
     bool in_check(Color color) const;
