@@ -1,8 +1,8 @@
 #include <iostream>
-#include "core/types.h"
+#include "core/types.hpp"
 
 int main() {
-    std::cout << BOARD_SQUARES << std::endl;
+    std::cout << (1ULL << 63) << std::endl;
 
     return 0;
 }
