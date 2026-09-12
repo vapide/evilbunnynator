@@ -1,6 +1,8 @@
 #include <iostream>
+#include "core/types.h"
 
 int main() {
-    std::cout << "engine: toolchain ok";
+    std::cout << BOARD_SQUARES << std::endl;
+
     return 0;
 }

@@ -11,3 +11,5 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_executable(engine src/main.cpp)
+
+target_include_directories(engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
