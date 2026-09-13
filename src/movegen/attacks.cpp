@@ -48,6 +48,8 @@ static U64 pawn_mask(int square, Color color) {
     return ((b >> 7) & Bitboard::NOT_A) | ((b >> 9) & Bitboard::NOT_H);
 }
 
+
+
 void init() {
     for (int sq = 0; sq < 64; ++sq) {
         KNIGHT_ATTACKS[sq] = knight_mask(sq);
