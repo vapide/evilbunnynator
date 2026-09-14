@@ -33,4 +33,8 @@ int generate_pseudo_legal_moves(const Position& pos, Move* moves);
 
 }
 
+namespace {
+    int add_pawn_promotions(Move* moves, int count, int from_sq, int to_sq, int flags);
+}
+
 void init_all();
