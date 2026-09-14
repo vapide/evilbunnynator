@@ -17,7 +17,7 @@ public:
 
 private:
     bool is_loaded = false;
-}
+};
 
 
 class NNUE {
@@ -60,4 +60,4 @@ private:
     Accumulator stack[STACK_SIZE];
     int idx = 0;
     const NNUEWeights* net = nullptr;
-}
+};

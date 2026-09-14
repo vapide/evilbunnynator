@@ -79,7 +79,7 @@ int generate_pseudo_legal_moves(const Position& pos, Move* moves) {
         if (pos.ep_square != -1) {
             const int ep_target = pos.ep_square;
             if (Attacks::pawn(from_sq, side) & (1ULL << ep_target)) {
-                const int capture_sq = side == WHITE ? ep_target - 8 : ep_taget + 8;
+                const int capture_sq = side == WHITE ? ep_target - 8 : ep_target + 8;
                 const Piece expected = side == WHITE ? BP : WP;
                 if (pos.piece_at(capture_sq) == expected) {
                     moves[++count] = encode_move(from_sq, ep_target, CAPTURE | EN_PASSANT);
@@ -91,7 +91,7 @@ int generate_pseudo_legal_moves(const Position& pos, Move* moves) {
     for (int piece_type = KNIGHT; piece_type <= KING; ++piece_type) {
         U64 bb = pos.pieces[base + piece_type];
         while(bb) {
-            const int from_sq = Bitboard:pop_lsb(bb);
+            const int from_sq = Bitboard::pop_lsb(bb);
 
             U64 targets;
             switch (piece_type) {
@@ -153,6 +153,8 @@ int generate_pseudo_legal_moves(const Position& pos, Move* moves) {
             }
         } */
     }
+    return count;
+}
 }
 
 

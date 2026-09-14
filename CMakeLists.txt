@@ -102,7 +102,7 @@ set(ENGINE_SOURCES
 
     src/nnue/nnue.cpp
 
-    src/test/petft.cpp
+    src/test/perft.cpp
 
     src/utils/san.cpp
     src/utils/zobrist.cpp
