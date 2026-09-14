@@ -103,8 +103,36 @@ int generate_pseudo_legal_moves(const Position& pos, Move* moves) {
             }
             targets &= ~own_occ;
 
+
             if (piece_type == KING) {
-                // castling
+                // pseudo-legal castling (occupancy + rook checks only)
+                if (side == WHITE && from_sq == E1) {
+                    if ((pos.castling_rights & WK_CASTLE)
+                        && !(occ & ((1ULL << F1) | (1ULL << G1)))
+                        && pos.piece_at(H1) == WR) {
+                        moves[count++] = encode_move(E1, G1, CASTLE);
+                        targets &= ~(1ULL << G1);
+                    }
+                    if ((pos.castling_rights & WQ_CASTLE)
+                        && !(occ & ((1ULL << D1) | (1ULL << C1) | (1ULL << B1)))
+                        && pos.piece_at(A1) == WR) {
+                        moves[count++] = encode_move(E1, C1, CASTLE);
+                        targets &= ~(1ULL << C1);
+                    }
+                } else if (side == BLACK && from_sq == E8) {
+                    if ((pos.castling_rights & BQ_CASTLE)
+                        && !(occ & ((1ULL << D8) | (1ULL << C8) | (1ULL << B8)))
+                        && pos.piece_at(A8) == BR) {
+                        moves[count++] = encode_move(E8, C8, CASTLE);
+                        targets &= ~(1ULL << C8);
+                    }
+                    if ((pos.castling_rights & BK_CASTLE)
+                        && !(occ & ((1ULL << F8) | (1ULL << G8)))
+                        && pos.piece_at(H8) == BR) {
+                        moves[count++] = encode_move(E8, G8, CASTLE);
+                        targets &= ~(1ULL << G8);
+                    }
+                }
             }
 
             while (targets) {
