@@ -98,6 +98,11 @@ set(ENGINE_SOURCES
     src/movegen/magics.cpp
     src/movegen/movegen.cpp
     src/movegen/raytables.cpp
+    src/movegen/kingsafety.cpp
+
+    src/nnue/nnue.cpp
+
+    src/test/petft.cpp
 
     src/utils/san.cpp
     src/utils/zobrist.cpp
