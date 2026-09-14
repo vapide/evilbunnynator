@@ -96,6 +96,8 @@ set(ENGINE_SOURCES
 
     src/movegen/attacks.cpp
     src/movegen/magics.cpp
+    src/movegen/movegen.cpp
+    src/movegen/raytables.cpp
 
     src/utils/san.cpp
     src/utils/zobrist.cpp
