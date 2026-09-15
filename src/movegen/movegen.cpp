@@ -280,7 +280,7 @@ int generate_non_king_moves(Position& pos, const KingSafety& safety,
       }
     }
 
-    U64 cap_targets = Attacks::pawn(from_sq, side) & enemy_occ;
+    U64 cap_targets = Attacks::pawn(from_sq, side) & enemy_occ & allowed;
     while (cap_targets) {
       const int to_sq = Bitboard::pop_lsb(cap_targets);
       const bool is_promo_rank =

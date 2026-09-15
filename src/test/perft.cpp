@@ -40,7 +40,7 @@ void perft_divide(int depth, Position& pos) {
   Move moves[MAX_MOVES];
   const int move_count = MoveGen::generate_legal_moves(pos, moves);
 
-  std::cout << "\nPERFT DIV DEPTH:" << depth << ") ---" << std::endl;
+  std::cout << "\nPERFT DIV DEPTH: " << depth << std::endl;
 
   for (int i = 0; i < move_count; ++i) {
     const Move& move = moves[i];
