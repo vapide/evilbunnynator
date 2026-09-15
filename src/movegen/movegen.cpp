@@ -105,12 +105,39 @@ bool gives_check(const Position& pos, Move move) {
   U64 occ = pos.all_occ;
   occ &= ~(1ULL << from_sq);
 
-  // if capture if en passant check
+  if (flags & CAPTURE) {
+    int captured_sq = to_sq;
+    if (flags & EN_PASSANT)
+      captured_sq = pos.side_to_move == WHITE ? to_sq - 8 : to_sq + 8;
+    occ &= ~(1ULL << captured_sq);
+  }
+  occ |= 1ULL << to_sq;
 
-  // check piece type if not promotion
+  const int piece_type = promotion ? promotion : moving_piece % 6;
+  const U64 king_bb = 1ULL << enemy_king_sq;
 
-  // check direct checks
-  // if direct return true;
+  bool direct = false;
+  switch (piece_type) {
+    case PAWN:
+      direct = (Attacks::pawn(to_sq, pos.side_to_move) & king_bb) != 0;
+      break;
+    case KNIGHT:
+      direct = (Attacks::knight(to_sq) & king_bb) != 0;
+      break;
+    case BISHOP:
+      direct = (Attacks::bishop(to_sq, occ) & king_bb) != 0;
+      break;
+    case ROOK:
+      direct = (Attacks::rook(to_sq, occ) & king_bb) != 0;
+      break;
+    case QUEEN:
+      direct = (Attacks::queen(to_sq, occ) & king_bb) != 0;
+      break;
+    case KING:
+      direct = (Attacks::king(to_sq) & king_bb) != 0;
+      break;
+  }
+  if (direct) return true;
 
   // check discovered checks
   return false;
@@ -224,13 +251,15 @@ int generate_non_king_moves(Position& pos, const KingSafety& safety,
       const int two_step = from_sq + 16;
 
       if (one_step < 64 && !(occ & (1ULL << one_step))) {
-        if (from_sq / 8 == 7) {
-          count = add_pawn_promotions(moves, count, from_sq, one_step, 0);
-        } else {
-          moves[count++] = encode_move(from_sq, one_step);
-          if (from_sq / 8 == 1 && !(occ & (1ULL << two_step))) {
-            moves[count++] = encode_move(from_sq, two_step);
-          }
+        if (one_step / 8 == 7) {  // destination not current position (63/8 = 7)
+          if (allowed & (1ULL << one_step))
+            count = add_pawn_promotions(moves, count, from_sq, one_step, 0);
+        } else if (!captures_only) {
+          if (allowed & (1ULL << one_step))
+            moves[count++] = encode_move(from_sq, one_step);
+          if (from_sq / 8 == 1 && !(occ & (1ULL << two_step)) &&
+              (allowed & (1ULL << two_step)))
+            moves[count++] = encode_move(from_sq, two_step, DOUBLE_PAWN_PUSH);
         }
       }
     } else {  // Black's Pawn
@@ -238,13 +267,15 @@ int generate_non_king_moves(Position& pos, const KingSafety& safety,
       const int two_step = from_sq - 16;
 
       if (one_step >= 0 && !(occ & (1ULL << one_step))) {
-        if (from_sq / 8 == 1) {
-          count = add_pawn_promotions(moves, count, from_sq, one_step, 0);
-        } else {
-          moves[count++] = encode_move(from_sq, one_step);
-          if (from_sq / 8 == 7 && !(occ & (1ULL << two_step))) {
-            moves[count++] = encode_move(from_sq, two_step);
-          }
+        if (one_step / 8 == 0) {
+          if (allowed & (1ULL << one_step))
+            count = add_pawn_promotions(moves, count, from_sq, one_step, 0);
+        } else if (!captures_only) {
+          if (allowed & (1ULL << one_step))
+            moves[count++] = encode_move(from_sq, one_step);
+          if (from_sq / 8 == 6 && !(occ & (1ULL << two_step)) &&
+              (allowed & (1ULL << two_step)))
+            moves[count++] = encode_move(from_sq, two_step, DOUBLE_PAWN_PUSH);
         }
       }
     }
@@ -267,8 +298,13 @@ int generate_non_king_moves(Position& pos, const KingSafety& safety,
         const int capture_sq = side == WHITE ? ep_target - 8 : ep_target + 8;
         const Piece expected = side == WHITE ? BP : WP;
         if (pos.piece_at(capture_sq) == expected) {
-          moves[count++] =
+          // make and unmake to check if its pinned (easier this way)
+          const Move candidate =
               encode_move(from_sq, ep_target, CAPTURE | EN_PASSANT);
+          pos.make_move(candidate);
+          const bool leaves_king_in_check = pos.in_check(side);
+          pos.unmake_move();
+          if (!leaves_king_in_check) moves[count++] = candidate;
         }
       }
     }
@@ -310,12 +346,9 @@ int generate_non_king_moves(Position& pos, const KingSafety& safety,
   }
 
   return count;
+}
 
 }  // namespace
-
-int generate_legal_moves(Position& pos, Move* moves) {
-  return generate_legal_moves(pos, analyze_king_safety(pos), moves);
-}
 
 int generate_legal_moves(Position& pos, const KingSafety& safety, Move* moves) {
   const int checker_count = Bitboard::popcount(safety.checkers);
@@ -331,8 +364,8 @@ int generate_legal_moves(Position& pos, const KingSafety& safety, Move* moves) {
   return count;
 }
 
-int generate_legal_captures(Position& pos, Move* moves) {
-  return generate_legal_captures(pos, analyze_king_safety(pos), moves);
+int generate_legal_moves(Position& pos, Move* moves) {
+  return generate_legal_moves(pos, analyze_king_safety(pos), moves);
 }
 
 int generate_legal_captures(Position& pos, const KingSafety& safety,
@@ -348,6 +381,10 @@ int generate_legal_captures(Position& pos, const KingSafety& safety,
   count += generate_non_king_moves(pos, safety, moves + count, true);
 
   return count;
+}
+
+int generate_legal_captures(Position& pos, Move* moves) {
+  return generate_legal_captures(pos, analyze_king_safety(pos), moves);
 }
 
 int generate_pseudo_legal_moves(const Position& pos, Move* moves) {
@@ -496,6 +533,24 @@ int generate_pseudo_legal_moves(const Position& pos, Move* moves) {
   return count;
 }
 }  // namespace MoveGen
+
+// methods in Position that need the movegen methods
+
+bool Position::in_check(Color color) const {
+  return MoveGen::is_square_attacked(*this, king_square(color),
+                                     color == WHITE ? BLACK : WHITE);
+}
+
+bool Position::is_checkmate(Color color) {
+  if (!in_check(color)) return false;
+  Move moves[MAX_MOVES];
+  return MoveGen::generate_legal_moves(*this, moves) == 0;
+}
+
+bool Position::is_game_over() {
+  Move moves[MAX_MOVES];
+  return MoveGen::generate_legal_moves(*this, moves) == 0;
+}
 
 void init_all() {
   Zobrist::init();
