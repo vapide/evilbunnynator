@@ -17,7 +17,11 @@ class UCI {
   bool handle_command(const std::string& line);
 
  private:
-  void write(const std::string& text);
+  void handle_position(const std::vector<std::string>& args);
+  void handle_go(const std::vector<std::string>& args);
   void handle_uci();
+  void handle_help(const std::vector<std::string>& args);
+  Move legal_move_from_uci(const std::string& move_text);
+  void write(const std::string& text);
   Engine engine;
 };

@@ -19,6 +19,15 @@ std::vector<std::string> split(const std::string& line) {
   return parts;
 }
 
+bool parse_int(const std::string& s, int64_t& out) {
+  try {
+    out = std::stoll(s);
+    return true;
+  } catch (const std::exception&) {
+    return false;
+  }
+}
+
 }  // namespace
 
 void UCI::loop() {
@@ -43,6 +52,44 @@ bool UCI::handle_command(const std::string& line) {
   }
 
   return true;
+}
+
+void UCI::handle_position(const std::vector<std::string>& args) {
+  if (args.empty()) return;
+
+  size_t move_idx = args.size();
+  for (int i = 0; i < move_idx; ++i) {
+    if (args[i] == "moves") {
+      move_idx = i;
+      break;
+    }
+  }
+
+  if (args[0] == "startpos") {
+    engine.board = Position::startpos();
+  } else if (args[0] == "fen") {
+    if (move_idx - 1 != 6) {
+      write("wrong fen size");
+      return;
+    }
+    std::string fen;
+    for (size_t i = 1; i < move_idx; ++i) {
+      if (i > 1) fen += ' ';
+      fen += args[i];
+    }
+    engine.board = Position::from_fen(fen);
+  } else {
+    return;
+  }
+
+  for (size_t i = move_idx + 1; i < args.size(); ++i) {
+    const Move move = legal_move_from_uci(args[i]);
+    if (move == MOVE_NONE) {
+      write("info string Failed to parse or process move: " + args[i]);
+      return;
+    }
+    engine.board.make_move(move);
+  }
 }
 
 void UCI::write(const std::string& text) { std::cout << text << std::endl; }
