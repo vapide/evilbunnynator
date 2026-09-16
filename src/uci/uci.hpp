@@ -18,6 +18,6 @@ class UCI {
 
  private:
   void write(const std::string& text);
-
+  void handle_uci();
   Engine engine;
 };

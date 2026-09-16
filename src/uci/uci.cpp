@@ -35,14 +35,7 @@ bool UCI::handle_command(const std::string& line) {
   const std::vector<std::string> args(parts.begin() + 1, parts.end());
 
   if (command == "uci") {
-    // id
-    write("id name bunnynator");
-    write("id author superbunnylover58 on instagram");
-
-    // uci option list
-
-    // ok response
-    write("uciok");
+    handle_uci();
   } else if (command == "isready") {
     write("readyok");
   } else if (command == "quit") {
@@ -53,3 +46,9 @@ bool UCI::handle_command(const std::string& line) {
 }
 
 void UCI::write(const std::string& text) { std::cout << text << std::endl; }
+
+void UCI::handle_uci() {
+  write("id name bunnynator");
+  write("id author superbunnylover58 on instagram");
+  write("uciok");
+}
