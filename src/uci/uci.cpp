@@ -21,8 +21,6 @@ std::vector<std::string> split(const std::string& line) {
 
 }  // namespace
 
-void UCI::write(const std::string& text) { std::cout << text << std::endl; }
-
 void UCI::loop() {
   std::string line;
   while (std::getline(std::cin, line))
@@ -38,19 +36,20 @@ bool UCI::handle_command(const std::string& line) {
 
   if (command == "uci") {
     // id
-    std::cout << "id name bunnynator" << std::endl;
-    std::cout << "id author superbunnylover58 on instagram" << std::endl;
-    std::cout << std::endl;
+    write("id name bunnynator");
+    write("id author superbunnylover58 on instagram");
 
     // uci option list
 
     // ok response
-    std::cout << "uciok";
+    write("uciok");
   } else if (command == "isready") {
-    std::cout << "readyok" << std::endl;
+    write("readyok");
   } else if (command == "quit") {
     return false;
   }
 
   return true;
 }
+
+void UCI::write(const std::string& text) { std::cout << text << std::endl; }

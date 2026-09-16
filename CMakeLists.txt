@@ -94,6 +94,8 @@ set(ENGINE_SOURCES
     src/core/move.cpp
     src/core/position.cpp
 
+    src/engine/engine.cpp
+
     src/movegen/attacks.cpp
     src/movegen/magics.cpp
     src/movegen/movegen.cpp
@@ -104,8 +106,9 @@ set(ENGINE_SOURCES
 
     src/test/perft.cpp
 
-    src/utils/paths.cpp
+    src/uci/uci.cpp
 
+    src/utils/paths.cpp
     src/utils/san.cpp
     src/utils/zobrist.cpp
 )
