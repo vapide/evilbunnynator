@@ -104,6 +104,8 @@ set(ENGINE_SOURCES
 
     src/test/perft.cpp
 
+    src/utils/paths.cpp
+
     src/utils/san.cpp
     src/utils/zobrist.cpp
 )
