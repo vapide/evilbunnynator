@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "bitboard.hpp"
+#include "position.hpp"
 
 // requires the following methods for position:
 //
@@ -17,7 +18,6 @@ Position::Position() {
 
 Position Position::from_fen(const std::string& fen) {
   Position position;
-
   std::istringstream ss(fen);
   std::string placement, stm, castling, ep, halfmove = "0", fullmove = "1";
   ss >> placement >> stm >> castling >> ep >> halfmove >> fullmove;
@@ -97,6 +97,58 @@ Position Position::from_fen(const std::string& fen) {
 
 Position Position::startpos() {
   return from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+}
+
+std::string Position::to_fen() const {
+  std::string fen;
+  // top to bottom
+  for (int rank = 7; rank >= 0; --rank) {
+    int empty = 0;
+    for (int file = 0; file <= 7; ++file) {
+      Piece p = piece_at(rank * 8 + file);
+      if (p == NO_PIECE) {
+        ++empty;
+      } else {
+        if (empty > 0) {
+          fen += char('0' + empty);
+          empty = 0;
+          fen += (p < 6 ? "PNBRQK" : "pnbrqk")[p % 6];
+        }
+      }
+    }
+    if (empty > 0) {
+      fen += char('0' + empty);
+      // std::cout << "empty char: " << empty << std::endl;
+    }
+    if (rank > 0) {
+      fen += '/';
+    }
+  }
+
+  // stm, castling, en passant, halfmove, fullmove
+  fen += ' ';
+  fen += ((side_to_move == WHITE) ? 'w' : 'b');
+
+  std::string castlingrights;
+  for (int i = 0; i < 4; ++i) {
+    if (1 << i & castling_rights) {
+      castlingrights += "KQkq"[i];
+    }
+  }
+
+  fen += ' ';
+
+  fen += castlingrights.empty() ? "-" : castlingrights;
+
+  fen += ' ';
+  fen += ((ep_square != -1) ? square_name(ep_square) : "-");
+
+  fen += ' ';
+  fen += std::to_string(halfmove_clock);
+  fen += ' ';
+  fen += std::to_string(fullmove_number);
+
+  return fen;
 }
 
 void Position::update_occupancy() {
@@ -455,7 +507,7 @@ void Position::pretty_print() const {
         line += ". ";
       else {
         line += (piece < 6 ? "PNBRQK" : "pnbrqk")[piece % 6];
-        line += ' ';
+        line += " ";
       }
     }
     std::cout << line << '\n';

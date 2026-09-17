@@ -21,7 +21,7 @@ class UCI {
   void handle_go(const std::vector<std::string>& args);
   void handle_uci();
   void handle_help(const std::vector<std::string>& args);
-  Move legal_move_from_uci(const std::string& move_text);
+  Move legal_move_from_uci(Position& pos, const std::string& text);
   void write(const std::string& text);
   Engine engine;
 };
