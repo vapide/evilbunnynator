@@ -103,6 +103,7 @@ set(ENGINE_SOURCES
     src/movegen/perft.cpp
     src/movegen/raytables.cpp
 
+    src/evaluation/material.cpp
 
     src/nnue/nnue.cpp
 

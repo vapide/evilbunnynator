@@ -90,7 +90,6 @@ bool is_square_attacked(const Position& pos, int square, Color attacker_color) {
   return is_square_attacked(pos, square, attacker_color, pos.all_occ);
 }
 
-// TODO: implement
 bool gives_check(const Position& pos, Move move) {
   const int from_sq = get_from(move);
   const int to_sq = get_to(move);
