@@ -28,8 +28,7 @@ int generate_legal_captures(Position& pos, Move* moves);
 int generate_legal_captures(Position& pos, const KingSafety& safety,
                             Move* moves);
 
-// pseudo-legal generation even though genlegal generates directly
-// this can be useful for perft later
+// broken and useless
 int generate_pseudo_legal_moves(const Position& pos, Move* moves);
 
 }  // namespace MoveGen

@@ -97,14 +97,15 @@ set(ENGINE_SOURCES
     src/engine/engine.cpp
 
     src/movegen/attacks.cpp
+    src/movegen/kingsafety.cpp
     src/movegen/magics.cpp
     src/movegen/movegen.cpp
+    src/movegen/perft.cpp
     src/movegen/raytables.cpp
-    src/movegen/kingsafety.cpp
+
 
     src/nnue/nnue.cpp
 
-    src/test/perft.cpp
 
     src/uci/uci.cpp
 

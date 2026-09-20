@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../movegen/movegen.hpp"
+#include "../movegen/perft.hpp"
 
 void Engine::join_search_thread() {
   if (search_thread.joinable()) search_thread.join();
@@ -29,6 +30,16 @@ void Engine::think_async(const SearchLimits& limits,
 
   search_thread =
       std::thread(&Engine::think, this, limits, std::move(on_complete));
+}
+
+uint64_t Engine::perft(int depth) {
+  if (depth < 0) return 0;
+  return Perft::perft(board, depth);
+}
+
+uint64_t Engine::perft_divide(int depth) {
+  if (depth < 0) return 0;
+  return Perft::divide(board, depth);
 }
 
 void Engine::think(SearchLimits limits, std::function<void(Move)> on_complete) {

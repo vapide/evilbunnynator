@@ -18,6 +18,9 @@ class Engine {
     join_search_thread();
   }
 
+  uint64_t perft(int depth);
+  uint64_t perft_divide(int depth);
+
   void new_game() {
     stop_search();
     join_search_thread();

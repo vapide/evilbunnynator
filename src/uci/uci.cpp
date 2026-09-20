@@ -180,7 +180,7 @@ void UCI::handle_position(const std::vector<std::string>& args) {
       }
 
       engine.board = Position::from_fen(fen);
-      // write("info string FEN loaded and validated");
+      write("info string FEN loaded and validated");
 
       for (size_t i = move_idx + 1; i < args.size(); ++i) {
         engine.board.make_move(
@@ -190,10 +190,10 @@ void UCI::handle_position(const std::vector<std::string>& args) {
       }
 
       // engine.board.pretty_print();
-      // write("info string FEN: " + engine.board.to_fen());
+      write("info string FEN: " + engine.board.to_fen());
 
     } else {
-      write("info string Invalid FEN");
+      write("info string Invalid FEN/Position");
     }
     return;
   } else {
@@ -208,45 +208,74 @@ void UCI::handle_position(const std::vector<std::string>& args) {
     }
     engine.board.make_move(move);
   }
-
-  write("info string " + engine.board.to_fen());
 }
 
 void UCI::handle_go(const std::vector<std::string>& args) {
-  if (args.empty()) return;
-
   SearchLimits limits;
 
-  // replace with different structure and parse_int later
-  /*
-  for (same ) {
-  const string copy & token  = args[i]
-
-  auto nextint lambda {
-  whats inside depth and movetime to get next int
-  }
-  if statements for each case
-  }
-  */
+  // treating "go" as "go infinite"
+  if (args.empty()) limits.infinite = true;
 
   for (size_t i = 0; i < args.size(); ++i) {
-    if (args[i] == "depth") {
-      if (i + 1 < args.size()) {
-        limits.depth = std::stoi(args[i + 1]);
+    const std::string& token = args[i];
+    int64_t v;
 
-        ++i;  // skip number for depth.
-      }
-    } else if (args[i] == "movetime") {
-      if (i + 1 < args.size()) {
-        limits.movetime = std::stoi(args[i + 1]);
-
+    auto next_int = [&](int64_t& out) {
+      if (i + 1 < args.size() && parse_int(args[i + 1], out)) {
         ++i;
+        return true;
       }
-      // technically can be something like go infinite depth 25
-      // (constraint: go until depth 25 or until stop command)
-    } else if (args[i] == "infinite") {
+      if (i + 1 < args.size()) {
+        ++i;  // skip malformed value
+      }
+      return false;
+    };
+
+    // ordering: depth, mt, nodes, wt, bt, winc, binc, mate, inf, ponder, perft,
+    // & searchmoves.
+    if (token == "depth") {
+      if (next_int(v)) limits.depth = static_cast<int>(v);
+    } else if (token == "movetime") {
+      if (next_int(v)) limits.movetime = static_cast<int>(v);
+    } else if (token == "movetime") {
+      if (next_int(v)) limits.movetime = static_cast<int>(v);
+    } else if (token == "nodes") {
+      if (next_int(v)) limits.nodes = static_cast<int>(v);
+    } else if (token == "wtime") {
+      if (next_int(v)) limits.wtime = static_cast<int>(v);
+    } else if (token == "btime") {
+      if (next_int(v)) limits.btime = static_cast<int>(v);
+    } else if (token == "winc") {
+      if (next_int(v)) limits.winc = static_cast<int>(v);
+    } else if (token == "binc") {
+      if (next_int(v)) limits.binc = static_cast<int>(v);
+    } else if (token == "mate") {
+      if (next_int(v)) limits.mate = static_cast<int>(v);
+    } else if (token == "infinite") {
       limits.infinite = true;
+    } else if (token == "ponder") {
+      limits.ponder = true;
+    } else if (token == "perft") {
+      if (next_int(v)) limits.perft = static_cast<int>(v);
+    } else if (token == "searchmoves") {
+      while (i + 1 < args.size()) {
+        const Move m = from_uci(args[i]);
+        if (m == MOVE_NONE) break;
+        limits.searchmoves.push_back(m);
+        ++i;  //
+      }
+    } else if (token == "d") {
+      engine.board.pretty_print();
+      write("Fen: " + engine.board.to_fen());
     }
+  }
+
+  if (limits.perft >= 0) {
+    // temporarily divide
+    const uint64_t nodes = engine.perft_divide(limits.perft);
+    write("info string perft " + std::to_string(limits.perft) + " nodes " +
+          std::to_string(nodes));
+    return;
   }
 
   engine.think_async(limits, [this](Move best_move) {
