@@ -60,12 +60,18 @@ bool UCI::handle_command(const std::string& line) {
   const std::string& command = parts[0];
   const std::vector<std::string> args(parts.begin() + 1, parts.end());
 
-  if (command == "uci") {
+  if (command == "go") {
+    handle_go(args);
+  } else if (command == "uci") {
     handle_uci();
+  } else if (command == "stop") {
+    engine.stop_search();
   } else if (command == "position") {
     handle_position(args);
   } else if (command == "isready") {
     write("readyok");
+  } else if (command == "ucinewgame") {
+    engine.new_game();
   } else if (command == "quit") {
     return false;
   }
@@ -174,7 +180,7 @@ void UCI::handle_position(const std::vector<std::string>& args) {
       }
 
       engine.board = Position::from_fen(fen);
-      write("info string FEN loaded and validated");
+      // write("info string FEN loaded and validated");
 
       for (size_t i = move_idx + 1; i < args.size(); ++i) {
         engine.board.make_move(
@@ -184,7 +190,7 @@ void UCI::handle_position(const std::vector<std::string>& args) {
       }
 
       // engine.board.pretty_print();
-      write("info string FEN: " + engine.board.to_fen());
+      // write("info string FEN: " + engine.board.to_fen());
 
     } else {
       write("info string Invalid FEN");
@@ -204,6 +210,52 @@ void UCI::handle_position(const std::vector<std::string>& args) {
   }
 
   write("info string " + engine.board.to_fen());
+}
+
+void UCI::handle_go(const std::vector<std::string>& args) {
+  if (args.empty()) return;
+
+  SearchLimits limits;
+
+  // replace with different structure and parse_int later
+  /*
+  for (same ) {
+  const string copy & token  = args[i]
+
+  auto nextint lambda {
+  whats inside depth and movetime to get next int
+  }
+  if statements for each case
+  }
+  */
+
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (args[i] == "depth") {
+      if (i + 1 < args.size()) {
+        limits.depth = std::stoi(args[i + 1]);
+
+        ++i;  // skip number for depth.
+      }
+    } else if (args[i] == "movetime") {
+      if (i + 1 < args.size()) {
+        limits.movetime = std::stoi(args[i + 1]);
+
+        ++i;
+      }
+      // technically can be something like go infinite depth 25
+      // (constraint: go until depth 25 or until stop command)
+    } else if (args[i] == "infinite") {
+      limits.infinite = true;
+    }
+  }
+
+  engine.think_async(limits, [this](Move best_move) {
+    if (best_move == MOVE_NONE) {
+      write("bestmove 0000");
+    } else {
+      write("bestmove " + to_uci(best_move));
+    }
+  });
 }
 
 void UCI::write(const std::string& text) { std::cout << text << std::endl; }
