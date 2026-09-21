@@ -1,12 +1,13 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <thread>
 
 #include "../core/position.hpp"
 #include "../search/limits.hpp"
-#include "../utils/rkiss.hpp"
+#include "../search/search.hpp"
 
 class Engine {
  public:
@@ -18,6 +19,8 @@ class Engine {
     join_search_thread();
   }
 
+  std::unique_ptr<Search> search;
+
   uint64_t perft(int depth);
   uint64_t perft_divide(int depth);
 
@@ -25,6 +28,7 @@ class Engine {
     stop_search();
     join_search_thread();
     board = Position::startpos();
+    search->reset();
   }
 
   Position board;
@@ -45,6 +49,4 @@ class Engine {
 
   std::mutex wait_mutex;
   std::condition_variable wait_cv;
-
-  RKISS rng;
 };

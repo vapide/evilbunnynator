@@ -105,7 +105,10 @@ set(ENGINE_SOURCES
 
     src/evaluation/material.cpp
 
-    src/nnue/nnue.cpp
+    src/search/negamax.cpp
+    src/search/search.cpp
+
+    #src/nnue/nnue.cpp
 
 
     src/uci/uci.cpp
@@ -133,6 +136,11 @@ elseif(MINGW)
 elseif(APPLE)
     target_link_options(engine PRIVATE -Wl,-stack_size,0x800000)
 endif()
+
+foreach(section paths magics raytables makeunmake zobrist history legality
+                pseudolegal movegen pins perft material scale search)
+    add_test(NAME ${section} COMMAND test_engine ${section})
+endforeach()
 
 ###############################################################################
 # Release Optimizations
