@@ -193,7 +193,7 @@ void UCI::handle_position(const std::vector<std::string>& args) {
       }
 
       // engine.board.pretty_print();
-      write("info string FEN: " + engine.board.to_fen());
+      // write("info string FEN: " + engine.board.to_fen());
 
     } else {
       write("info string Invalid FEN/Position");

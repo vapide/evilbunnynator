@@ -17,7 +17,7 @@ int material_eval(const Position& pos) {
     // difference in piece counts x material value e.g. distributive property
     material_count += material_popcount * MATERIAL_VALUES[i];
   }
-  return material_popcount;
+  return material_count;
 }
 
 // total non king material on the board from both sides.
