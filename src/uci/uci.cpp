@@ -72,6 +72,9 @@ bool UCI::handle_command(const std::string& line) {
     write("readyok");
   } else if (command == "ucinewgame") {
     engine.new_game();
+  } else if (command == "d") {
+    engine.board.pretty_print();
+    write("Fen: " + engine.board.to_fen());
   } else if (command == "quit") {
     return false;
   }
@@ -264,9 +267,6 @@ void UCI::handle_go(const std::vector<std::string>& args) {
         limits.searchmoves.push_back(m);
         ++i;  //
       }
-    } else if (token == "d") {
-      engine.board.pretty_print();
-      write("Fen: " + engine.board.to_fen());
     }
   }
 
