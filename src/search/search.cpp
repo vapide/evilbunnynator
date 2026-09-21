@@ -1,6 +1,7 @@
 #include "search.hpp"
 
 #include <cassert>
+#include <iostream>
 
 #include "../movegen/movegen.hpp"
 
@@ -26,14 +27,18 @@ Move Search::find_best_move(Position& pos, const SearchLimits& search_limits) {
     return MOVE_NONE;
   }
 
+  int alpha = -INF_SCORE;
+
   Move best_move = root_moves[0];
   int best = -INF_SCORE;
+
+  pv.reset_line(0);
 
   // root loop
   for (int i = 0; i < count; ++i) {
     do_move(pos, root_moves[i]);
 
-    const int score = -negamax(pos, limits.depth - 1, -INF_SCORE, INF_SCORE, 1);
+    const int score = -negamax(pos, limits.depth - 1, -INF_SCORE, -alpha, 1);
 
     undo_move(pos);
 
@@ -43,8 +48,15 @@ Move Search::find_best_move(Position& pos, const SearchLimits& search_limits) {
     if (score > best) {
       best = score;
       best_move = root_moves[i];
+      pv.update(0, root_moves[i]);
     }
   }
+
+  std::cout << "info depth " << limits.depth << " score cp " << best << " pv "
+            << pv.to_string() << std::endl;
+
+  last_pv.clear();
+  for (int i = 0; i < pv.line_length(); ++i) last_pv.push_back(pv.line_move(i));
 
   assert(pos.ply == entry_ply);
   // for NDEBUG builds
@@ -60,5 +72,9 @@ void Search::reset() {
 
 void Search::clear_for_search() {
   nodes = 0;
+  seldepth = 0;
   best_score = EVAL_NONE;
+  for (int i = 0; i < STACK_SIZE; ++i) stack[i].reset();
+  last_pv.clear();
+  pv.clear();
 }

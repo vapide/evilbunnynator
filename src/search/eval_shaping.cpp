@@ -1,7 +1,6 @@
-/* #include "material.hpp"
-
 #include "../core/bitboard.hpp"
-#include "../core/position.hpp"
+#include "../evaluation/material.hpp"
+#include "search.hpp"
 
 // side to move perspective, just for now.
 int material_eval(const Position& pos) {
@@ -28,9 +27,28 @@ int total_material(const Position& pos) {
   return total;
 }
 
-    // chose to do stm == BLACK instead of base == 6 to not hard code values
-    material_popcount =
-        Bitboard::popcount(pos.pieces[i + base]) -
-        Bitboard::popcount(stm == BLACK ? pos.pieces[i] : pos.pieces[i - base]);
+bool Search::is_draw(const Position& pos) const {
+  // ordered by cost
+  return pos.halfmove_clock >= DRAW_HALFMOVE_LIMIT ||
+         pos.is_insufficient_material() || pos.is_repetition();
+}
 
-*/
+int Search::draw_score(int m_diff) const {
+  int score = 1 - static_cast<int>(nodes & 2);
+  if (m_diff < -DRAW_MDIFF_BIAS) {
+    score += DRAW_BIAS_SCORE;
+  } else if (m_diff > DRAW_MDIFF_BIAS) {
+    score -= DRAW_BIAS_SCORE;
+  }
+  return score;
+}
+
+// test nps here
+/*
+  if (pos.halfmove_clock >= DRAW_HALFMOVE_LIMIT) {
+return true;
+} else if (pos.is_insufficient_material()) {
+return true;
+} else if (pos.is_repetition()) {
+return true;
+}*/

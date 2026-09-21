@@ -107,7 +107,8 @@ set(ENGINE_SOURCES
 
     src/search/negamax.cpp
     src/search/search.cpp
-
+    src/search/eval_shaping.cpp
+    
     #src/nnue/nnue.cpp
 
 

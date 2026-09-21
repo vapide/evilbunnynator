@@ -1,18 +1,44 @@
 #include <algorithm>
+#include <iostream>
 
+#include "../evaluation/material.hpp"
 #include "../movegen/movegen.hpp"
 #include "search.hpp"
 
 int Search::negamax(Position& pos, int depth, int alpha, int beta, int ply) {
   if (stop.load(std::memory_order_relaxed)) return 0;
+
+  pv.reset_line(ply);
+
+  PlyRecord& rec = stack[ply];
   ++nodes;
 
   if (ply >= MAX_PLY - 1) {
     return evaluate(pos);
   }
 
+  if (ply > seldepth) {
+    seldepth = ply;
+    // std::cout << "info string selfdepth " << seldepth << std::endl;
+  }
+
+  if (depth <= 0) {
+    return evaluate(pos);
+  }
+
+  const int mate_distance = CHECKMATE - ply;
+  if (mate_distance < beta) {
+    beta = mate_distance;
+    if (alpha >= beta) return beta;
+  }
+
   Move moves[MAX_MOVES];
   const int count = MoveGen::generate_legal_moves(pos, moves);
+
+  rec.m_diff = material_eval(pos);
+
+  // if (ply > 0 && is_draw(pos)) return DRAW;
+  if (ply > 0 && is_draw(pos)) return draw_score(rec.m_diff);
 
   // checkmate or stalemate
   if (count == 0) {
@@ -22,11 +48,9 @@ int Search::negamax(Position& pos, int depth, int alpha, int beta, int ply) {
     return DRAW;
   }
 
-  if (depth <= 0) {
-    return evaluate(pos);
-  }
-
   int best_score = -INF_SCORE;
+
+  const int og_alpha = alpha;
 
   for (int i = 0; i < count; ++i) {
     do_move(pos, moves[i]);
@@ -40,12 +64,15 @@ int Search::negamax(Position& pos, int depth, int alpha, int beta, int ply) {
 
     if (score > best_score) {
       best_score = score;
-    }
-    if (score > alpha) {
-      alpha = score;
-    }
-    if (alpha >= beta) {
-      break;
+
+      if (score > alpha) {
+        alpha = score;
+        pv.update(ply, moves[i]);
+
+        if (alpha >= beta) {
+          break;
+        }
+      }
     }
   }
   return best_score;
