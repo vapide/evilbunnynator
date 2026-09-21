@@ -11,25 +11,16 @@
 
 class Engine {
  public:
-  Engine() { board = Position::startpos(); }
+  Engine();
 
-  // destructor
-  ~Engine() {
-    stop_search();
-    join_search_thread();
-  }
+  ~Engine();
 
   std::unique_ptr<Search> search;
 
   uint64_t perft(int depth);
   uint64_t perft_divide(int depth);
 
-  void new_game() {
-    stop_search();
-    join_search_thread();
-    board = Position::startpos();
-    search->reset();
-  }
+  void new_game();
 
   Position board;
 

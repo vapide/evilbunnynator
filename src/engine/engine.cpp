@@ -4,7 +4,14 @@
 
 #include "../movegen/perft.hpp"
 
-Engine::Engine() : search(std::make_unique<Search>());
+Engine::Engine() : search(std::make_unique<Search>()) {
+  board = Position::startpos();
+}
+
+Engine::~Engine() {
+  stop_search();
+  join_search_thread();
+}
 
 void Engine::join_search_thread() {
   if (search_thread.joinable()) search_thread.join();
@@ -35,6 +42,13 @@ void Engine::think_async(const SearchLimits& limits,
       std::thread(&Engine::think, this, limits, std::move(on_complete));
 }
 
+void Engine::new_game() {
+  stop_search();
+  join_search_thread();
+  board = Position::startpos();
+  search->reset();
+}
+
 uint64_t Engine::perft(int depth) {
   if (depth < 0) return 0;
   return Perft::perft(board, depth);
@@ -46,8 +60,6 @@ uint64_t Engine::perft_divide(int depth) {
 }
 
 void Engine::think(SearchLimits limits, std::function<void(Move)> on_complete) {
-  Move chosen = MOVE_NONE;
-
   const Move chosen = search->find_best_move(board, limits);
 
   // inifinite waits for a stop, movetime waits
