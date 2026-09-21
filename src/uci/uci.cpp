@@ -32,7 +32,42 @@ bool parse_int(const std::string& s, int64_t& out) {
 
 }  // namespace
 
-//
+UCI::UCI() {
+  engine.set_info_sink(
+      [this](const SearchInfo& info) { write(format_info(info)); });
+}
+
+std::string UCI::format_info(const SearchInfo& info) const {
+  std::string final = "info depth " + std::to_string(info.depth);
+  final += " seldepth " + std::to_string(info.seldepth);
+
+  if (std::abs(info.score) > CHECKMATE_THRESHOLD) {
+    int plies = CHECKMATE - std::abs(info.score);
+    int moves = (plies + 1) / 2;
+    moves *= info.score > 0 ? 1 : -1;
+    final += " score mate " + std::to_string(moves);
+  } else {
+    final += " score cp " + std::to_string(info.score);
+  }
+
+  final += " nodes " + std::to_string(info.nodes);
+
+  const double seconds =
+      (info.elapsed_ms > 0.001 ? info.elapsed_ms : 0.001) / 1000.0;
+  final += " nps " + std::to_string(static_cast<int64_t>(info.nodes / seconds));
+
+  final += " time " + std::to_string(static_cast<int64_t>(info.elapsed_ms));
+  if (!info.pv[0].empty()) {
+    final += " pv";
+    for (const Move move : info.pv[0]) {
+      final += " " + to_uci(move);
+    }
+  }
+
+  // final += "\n";
+  return final;
+}
+
 Move UCI::legal_move_from_uci(Position& pos, const std::string& text) {
   const Move parsed = from_uci(text);
   if (parsed == MOVE_NONE) return MOVE_NONE;
@@ -147,6 +182,8 @@ bool valid_fen(const std::vector<std::string>& f) {
 void UCI::handle_position(const std::vector<std::string>& args) {
   if (args.empty()) return;
 
+  Position parsed;
+
   size_t move_idx = args.size();
   for (int i = 0; i < move_idx; ++i) {
     if (args[i] == "moves") {
@@ -156,7 +193,7 @@ void UCI::handle_position(const std::vector<std::string>& args) {
   }
 
   if (args[0] == "startpos") {
-    engine.board = Position::startpos();
+    parsed = Position::startpos();
   } else if (args[0] == "fen") {
     if (move_idx - 1 != 6) {
       write("wrong fen size");
@@ -182,16 +219,17 @@ void UCI::handle_position(const std::vector<std::string>& args) {
         fen += fenvec[i] + ' ';
       }
 
-      engine.board = Position::from_fen(fen);
+      parsed = Position::from_fen(fen);
       write("info string FEN loaded and validated");
 
       for (size_t i = move_idx + 1; i < args.size(); ++i) {
-        engine.board.make_move(
-            static_cast<Move>(legal_move_from_uci(engine.board, args[i])));
+        parsed.make_move(
+            static_cast<Move>(legal_move_from_uci(parsed, args[i])));
         // engine.board.pretty_print();
         // std::cout << engine.board.to_fen() << std::endl;
       }
 
+      engine.set_position(parsed);
       // engine.board.pretty_print();
       // write("info string FEN: " + engine.board.to_fen());
 

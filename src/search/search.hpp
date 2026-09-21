@@ -17,10 +17,24 @@
 
 class Position;
 
+// not a string, as search does not know what depth will be printed as "depth",
+// and it shouldn't. pv points at a sort-of storage that the search owns, and is
+// valid for only the duration of the call
+struct SearchInfo {
+  int depth;
+  int seldepth;
+  int score;
+  int64_t nodes;
+  double elapsed_ms;
+  const std::vector<Move>* pv;
+};
+
 class Search {
  public:
   static constexpr int DEFAULT_DEPTH = 5;
   static constexpr int STACK_SIZE = MAX_PLY + 4;
+
+  std::function<void(const SearchInfo&)> on_info;
 
   Move find_best_move(Position& pos, const SearchLimits& search_limits);
 
@@ -55,8 +69,15 @@ class Search {
 
   int draw_score(int m_diff) const;
 
+  double elapsed_ms() const {
+    return std::chrono::duration<double, std::milli>(
+               std::chrono::steady_clock::now() - start_time)
+        .count();
+  }
+
   SearchLimits limits;
   std::atomic<bool> stop{false};
   PlyRecord stack[STACK_SIZE];
   PrincipalVariation pv;
+  std::chrono::steady_clock::time_point start_time;
 };

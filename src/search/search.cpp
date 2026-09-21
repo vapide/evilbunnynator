@@ -9,6 +9,7 @@ Move Search::find_best_move(Position& pos, const SearchLimits& search_limits) {
   SearchLimits limits = search_limits;
 
   clear_for_search();
+  start_time = std::chrono::steady_clock::now();
 
   if (limits.depth <= 0) {
     limits.depth = DEFAULT_DEPTH;
@@ -52,11 +53,14 @@ Move Search::find_best_move(Position& pos, const SearchLimits& search_limits) {
     }
   }
 
-  std::cout << "info depth " << limits.depth << " score cp " << best << " pv "
-            << pv.to_string() << std::endl;
-
   last_pv.clear();
   for (int i = 0; i < pv.line_length(); ++i) last_pv.push_back(pv.line_move(i));
+
+  if (on_info) {
+    const SearchInfo info{limits.depth, seldepth,     best,
+                          nodes,        elapsed_ms(), &last_pv};
+    on_info(info);
+  }
 
   assert(pos.ply == entry_ply);
   // for NDEBUG builds

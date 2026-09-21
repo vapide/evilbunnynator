@@ -28,6 +28,10 @@ void Engine::stop_search() {
   wait_cv.notify_all();
 }
 
+void Engine::set_info_sink(std::function<void(const SearchInfo&)> sink) {
+  search->on_info = std::move(sink);
+}
+
 void Engine::think_async(const SearchLimits& limits,
                          std::function<void(Move)> on_complete) {
   // one at a time
@@ -57,6 +61,12 @@ uint64_t Engine::perft(int depth) {
 uint64_t Engine::perft_divide(int depth) {
   if (depth < 0) return 0;
   return Perft::divide(board, depth);
+}
+
+void Engine::set_position(const Position& p) {
+  stop_search();
+  join_search_thread();
+  board = p;
 }
 
 void Engine::think(SearchLimits limits, std::function<void(Move)> on_complete) {

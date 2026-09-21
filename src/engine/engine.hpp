@@ -24,6 +24,10 @@ class Engine {
 
   Position board;
 
+  void set_info_sink(std::function<void(const SearchInfo&)> sink);
+
+  void set_position(const Position& p);
+
   void think_async(const SearchLimits& limits,
                    std::function<void(Move)> on_complete);
   bool is_searching() const {
@@ -32,7 +36,10 @@ class Engine {
   void stop_search();
 
  private:
+  std::function<void(const SearchInfo&)> search_on_info;
+
   void think(SearchLimits limits, std::function<void(Move)> on_complete);
+
   void join_search_thread();
   std::thread search_thread;
   std::atomic<bool> searching{false};

@@ -10,6 +10,9 @@
 // protocol strings, only uci.
 class UCI {
  public:
+  UCI();
+  std::string format_info(const SearchInfo&) const;
+
   // while std::cin basically
   void loop();
 
