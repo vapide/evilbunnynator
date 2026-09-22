@@ -112,13 +112,12 @@ std::string Position::to_fen() const {
         if (empty > 0) {
           fen += char('0' + empty);
           empty = 0;
-          fen += (p < 6 ? "PNBRQK" : "pnbrqk")[p % 6];
         }
+        fen += (p < 6 ? "PNBRQK" : "pnbrqk")[p % 6];
       }
     }
     if (empty > 0) {
       fen += char('0' + empty);
-      // std::cout << "empty char: " << empty << std::endl;
     }
     if (rank > 0) {
       fen += '/';

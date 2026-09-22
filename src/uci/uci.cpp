@@ -194,8 +194,14 @@ void UCI::handle_position(const std::vector<std::string>& args) {
 
   if (args[0] == "startpos") {
     parsed = Position::startpos();
+
+    // is skipped in else if args = fen because its a different branch
+    engine.set_position(parsed);
   } else if (args[0] == "fen") {
-    if (move_idx - 1 != 6) {
+    // possibility of fen like
+    // r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -
+    // without the halfmove clock
+    if (move_idx - 1 != 6 && move_idx - 1 != 4) {
       write("wrong fen size");
       return;
     }

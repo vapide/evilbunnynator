@@ -25,7 +25,7 @@ int Search::quiescence(Position& pos, int alpha, int beta, int ply) {
 
   // likely to be the only initialization of best score that isnt -INF_SCORE
   // this is because node has score already, and stm may decline the capture.
-  int best_score = evaluate(pos);
+  best_score = evaluate(pos);
 
   if (best_score >= beta) return best_score;
 
