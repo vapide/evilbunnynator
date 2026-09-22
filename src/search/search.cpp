@@ -76,6 +76,7 @@ void Search::reset() {
 
 void Search::clear_for_search() {
   nodes = 0;
+  qnodes = 0;
   seldepth = 0;
   best_score = EVAL_NONE;
   for (int i = 0; i < STACK_SIZE; ++i) stack[i].reset();

@@ -43,6 +43,8 @@ class Search {
   void stop_search() { stop.store(true, std::memory_order_relaxed); }
 
   int64_t nodes = 0;
+  int64_t qnodes = 0;
+
   int best_score = EVAL_NONE;
 
   std::vector<Move> last_pv;
@@ -60,6 +62,7 @@ class Search {
   void clear_for_search();
 
   int negamax(Position& pos, int depth, int alpha, int beta, int ply);
+  int quiescence(Position& pos, int alpha, int beta, int ply);
 
   // will hold accumulator modifiers later
   void do_move(Position& pos, Move move) { pos.make_move(move); }

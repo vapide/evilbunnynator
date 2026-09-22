@@ -11,20 +11,23 @@ int Search::negamax(Position& pos, int depth, int alpha, int beta, int ply) {
   pv.reset_line(ply);
 
   PlyRecord& rec = stack[ply];
-  ++nodes;
-
-  if (ply >= MAX_PLY - 1) {
-    return evaluate(pos);
-  }
 
   if (ply > seldepth) {
     seldepth = ply;
     // std::cout << "info string selfdepth " << seldepth << std::endl;
   }
 
-  if (depth <= 0) {
+  if (ply >= MAX_PLY - 1) {
     return evaluate(pos);
   }
+
+  if (depth <= 0) {
+    // same position not child so alpha beta are the same.
+    // simply handed to a different function.
+    return Search::quiescence(pos, alpha, beta, ply);
+  }
+
+  ++nodes;
 
   const int mate_distance = CHECKMATE - ply;
   if (mate_distance < beta) {
