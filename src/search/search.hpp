@@ -47,6 +47,9 @@ class Search {
 
   int best_score = EVAL_NONE;
 
+  // not private like quiescence and negamax since it reads and changes nothing
+  int see(const Position& pos, Move move) const;
+
   std::vector<Move> last_pv;
 
   int seldepth = 0;
