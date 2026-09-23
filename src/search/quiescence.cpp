@@ -23,16 +23,26 @@ int Search::quiescence(Position& pos, int alpha, int beta, int ply) {
   // is not making a claim, its more like giving up
   if (ply >= MAX_PLY - 1) return evaluate(pos);
 
+  const bool in_check = pos.in_check(pos.side_to_move);
+
+  int best_score;
+  Move moves[MAX_MOVES];
+  int count;
+
+  if (in_check) {
+    count = MoveGen::generate_legal_moves(pos, moves);
+    if (count == 0) return -CHECKMATE + ply;
+    best_score = -CHECKMATE;
+  } else {
+    best_score = evaluate(pos);
+    count = MoveGen::generate_legal_captures(pos, moves);
+  }
   // likely to be the only initialization of best score that isnt -INF_SCORE
   // this is because node has score already, and stm may decline the capture.
-  best_score = evaluate(pos);
 
   if (best_score >= beta) return best_score;
 
   if (best_score > alpha) alpha = best_score;
-
-  Move moves[MAX_MOVES];
-  const int count = MoveGen::generate_legal_captures(pos, moves);
 
   for (int i = 0; i < count; ++i) {
     do_move(pos, moves[i]);
