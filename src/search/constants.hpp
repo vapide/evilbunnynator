@@ -26,3 +26,9 @@ constexpr int floordiv(int a, int b) {
   const int q = a / b;
   return (a % b != 0 && (a < 0) != (b < 0)) ? q - 1 : q;
 }
+
+// tunable constants
+
+constexpr int QS_SEE_MARGIN = -107;
+// amount of moves you can look ahead with quiescence
+constexpr int QS_MOVE_LIMIT = 2;

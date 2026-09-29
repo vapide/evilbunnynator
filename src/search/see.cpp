@@ -14,7 +14,7 @@
 // the same destination square.
 int Search::see(const Position& pos, Move move) const {
   Square from_sq = get_from(move);
-  Square to_sq = get_from(move);
+  Square to_sq = get_to(move);
   Square cap_sq;
 
   Piece moving_piece = pos.piece_at(from_sq);
@@ -22,22 +22,22 @@ int Search::see(const Position& pos, Move move) const {
   int flags = get_flags(move);
   int promo = get_promotion(move);
 
-  int captured_piece;
+  int captured_piece = 0;
   int promoted = 0;
 
   int gain[32];
   int occupant_value;
 
   if (flags & EN_PASSANT) {
-    Square cap_sq = static_cast<Square>(cap_sq - 8);
-    int captured_piece = pos.piece_at(to_sq);
+    cap_sq = static_cast<Square>(to_sq + (pos.side_to_move == WHITE ? -8 : 8));
+    captured_piece = pos.piece_at(to_sq);
     gain[0] = PIECE_VALUES[captured_piece % 6];
     // can just be PIECE_VALUES[PAWN];
     occupant_value = PIECE_VALUES[moving_piece % 6];
   } else {
-    Square cap_sq = to_sq;
+    cap_sq = to_sq;
     if (promo) {
-      int captured_piece = pos.piece_at(cap_sq);
+      captured_piece = pos.piece_at(cap_sq);
       promoted = PIECE_VALUES[Bitboard::popcount(promo)];
       gain[0] = promoted - PIECE_VALUES[PAWN];
       occupant_value = promoted - PIECE_VALUES[PAWN];
@@ -64,9 +64,7 @@ int Search::see(const Position& pos, Move move) const {
 
     for (; lva_type <= KING; ++lva_type) {
       lva_bb = pos.pieces[stm * 6 + lva_type] & attackers;
-      std::cout << 1;
       if (lva_bb) {
-        std::cout << "info string found non-empty lva bb" << std::endl;
         break;
       }
     }

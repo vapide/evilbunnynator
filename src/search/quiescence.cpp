@@ -44,10 +44,20 @@ int Search::quiescence(Position& pos, int alpha, int beta, int ply) {
 
   if (best_score > alpha) alpha = best_score;
 
+  int moves_played = 0;
+
   for (int i = 0; i < count; ++i) {
+    if (!in_check) {
+      if (see(pos, moves[i]) < QS_SEE_MARGIN) continue;
+
+      ++moves_played;
+      if (moves_played > QS_MOVE_LIMIT) break;
+    }
+
     do_move(pos, moves[i]);
     const int score = -quiescence(pos, -beta, -alpha, ply + 1);
     undo_move(pos);
+
     if (stop.load(std::memory_order_relaxed)) {
       // ok here because we already have a valid score, not -INF_SCORE;
       return best_score;
