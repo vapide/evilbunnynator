@@ -52,26 +52,43 @@ int Search::see(const Position& pos, Move move) const {
   int stm = static_cast<Color>(pos.side_to_move ^ 1);
 
   int n = 1;
+
+  U64 lva_bb = 0;
+
   while (n < 32) {
     U64 attackers =
         MoveGen::attackers_to(pos, to_sq, static_cast<Color>(stm), occ) & occ;
     if (!attackers) break;
 
-    const Square attacker_sq = Bitboard::lsb(attackers);
+    int lva_type = PAWN;
+
+    for (; lva_type <= KING; ++lva_type) {
+      lva_bb = pos.pieces[stm * 6 + lva_type] & attackers;
+      std::cout << 1;
+      if (lva_bb) {
+        std::cout << "info string found non-empty lva bb" << std::endl;
+        break;
+      }
+    }
+
+    // const Square attacker_sq = Bitboard::lsb(attackers);
     gain[n] = occupant_value - gain[n - 1];
     ++n;
 
-    occ &= ~Bitboard::square_bb(attacker_sq);
-    occupant_value = PIECE_VALUES[pos.piece_at(attacker_sq) % 6];
+    occ &= ~(lva_bb & (~lva_bb + 1));
+    occupant_value = PIECE_VALUES[lva_type];
+    // occ &= ~Bitboard::square_bb(attacker_sq);
+    // occupant_value = PIECE_VALUES[pos.piece_at(attacker_sq) % 6];
     stm ^= 1;
   }
 
   // temporary fold which assumes every recapture happens
-  for (int i = n - 1; i > 0; --i) gain[i - 1] = -gain[i];
+  for (int i = n - 1; i > 0; --i) {
+    const int neg = -gain[i - 1];
+    gain[i - 1] = -(neg > gain[i] ? neg : gain[i]);
+  };
 
   return gain[0];
 
-  (void)pos;
-  (void)move;
   return 0;
 }
