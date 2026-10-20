@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstdint>
 #include <functional>
+#include <utility>
 #include <vector>
 
 #include "../core/move.hpp"
@@ -46,6 +47,7 @@ class Search {
   int64_t qnodes = 0;
 
   int best_score = EVAL_NONE;
+  int completed_depth = 0;
 
   // not private like quiescence and negamax since it reads and changes nothing
   int see(const Position& pos, Move move) const;
@@ -62,7 +64,16 @@ class Search {
   }
 
  private:
+  struct RootResult {
+    Move best_move;
+    int score;
+    bool completed;
+  };
+
   void clear_for_search();
+
+  std::pair<Move, int> iterative_deepening(Position& pos);
+  RootResult search_root(Position& pos, int depth);
 
   int negamax(Position& pos, int depth, int alpha, int beta, int ply);
   int quiescence(Position& pos, int alpha, int beta, int ply);
