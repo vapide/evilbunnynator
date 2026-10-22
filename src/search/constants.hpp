@@ -32,3 +32,6 @@ constexpr int floordiv(int a, int b) {
 constexpr int QS_SEE_MARGIN = -107;
 // amount of moves you can look ahead with quiescence
 constexpr int QS_MOVE_LIMIT = 2;
+
+// time management constants
+constexpr int MOVE_OVERHEAD_MS = 50;

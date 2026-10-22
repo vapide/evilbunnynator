@@ -6,7 +6,7 @@
 #include "search.hpp"
 
 int Search::negamax(Position& pos, int depth, int alpha, int beta, int ply) {
-  if (stop.load(std::memory_order_relaxed)) return 0;
+  if (check_time()) return 0;
 
   pv.reset_line(ply);
 

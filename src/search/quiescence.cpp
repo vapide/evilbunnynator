@@ -9,7 +9,7 @@
 // set--the qnode below a negamax node at ply 4 is ply 5.
 
 int Search::quiescence(Position& pos, int alpha, int beta, int ply) {
-  if (stop.load(std::memory_order_relaxed)) return 0;
+  if (check_time()) return 0;
 
   pv.reset_line(ply);
 

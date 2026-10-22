@@ -16,6 +16,7 @@ Move Search::find_best_move(Position& pos, const SearchLimits& search_limits) {
 
   clear_for_search();
   start_time = std::chrono::steady_clock::now();
+  compute_time_limits(limits);
 
   const int entry_ply = pos.ply;
 
@@ -121,12 +122,15 @@ Search::RootResult Search::search_root(Position& pos, int depth) {
 }
 
 std::pair<Move, int> Search::iterative_deepening(Position& pos) {
-  if (limits.depth <= 0) {
-    limits.depth = DEFAULT_DEPTH;
-  } else {
+  int max_depth;
+  if (limits.depth > 0) {
+    max_depth = limits.depth;
     limits.depth = std::clamp(limits.depth, 1, MAX_PLY - 2);
+  } else if (hard_limit_ms >= 0 || limits.infinite) {
+    max_depth = MAX_PLY - 2;
+  } else {
+    max_depth = DEFAULT_DEPTH;
   }
-  int max_depth = limits.depth;
 
   Move best_move = MOVE_NONE;
   int best = EVAL_NONE;
