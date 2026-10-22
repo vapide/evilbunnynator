@@ -72,17 +72,12 @@ void Engine::set_position(const Position& p) {
 void Engine::think(SearchLimits limits, std::function<void(Move)> on_complete) {
   const Move chosen = search->find_best_move(board, limits);
 
-  // inifinite waits for a stop, movetime waits
+  //  infinite waits for a stop, movetime waits
   //  until time or until stop-whichever is first. anything else returns at once
   //  because there is no depth or node count implemented by me yet.
   if (limits.infinite) {
     std::unique_lock<std::mutex> lock(wait_mutex);
     wait_cv.wait(lock, [this] {
-      return stop_requested.load(std::memory_order_acquire);
-    });
-  } else if (limits.movetime > 0) {
-    std::unique_lock<std::mutex> lock(wait_mutex);
-    wait_cv.wait_for(lock, std::chrono::milliseconds(limits.movetime), [this] {
       return stop_requested.load(std::memory_order_acquire);
     });
   }

@@ -110,6 +110,7 @@ set(ENGINE_SOURCES
     src/search/eval_shaping.cpp
     src/search/quiescence.cpp
     src/search/see.cpp
+    src/search/time_management.cpp
 
 
     #src/nnue/nnue.cpp
